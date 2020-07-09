@@ -10,8 +10,8 @@ on:
       - master                        # 主分支
     paths:                            # 路径
       - padavan/PSG1218/*                     # 监听openwrt目录下所有文件的push操作
-  watch:                              # 监视操作
-     types: [started]                  # 点击 star 之后
+  # watch:                              # 监视操作
+  #    types: [started]                  # 点击 star 之后
 env:
   T_NAMES: "PSG1218"        # 设备名字数组
   BASE_PATH: padavan                # 基础目录
