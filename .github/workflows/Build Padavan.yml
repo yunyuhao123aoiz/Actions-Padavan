@@ -11,8 +11,8 @@ on:
   #    - master
 #  schedule:
 #    - cron: 0 8 * * 5
-  watch:
-    types: [started]
+  # watch:
+  #   types: [started]
 
 jobs:
   build:
@@ -50,24 +50,6 @@ jobs:
         ################################################################################################
         #因不同型号配置功能不一样，所以先把配置项删除，如果你自己要添加其他的，也要写上删除这一条，切记！！！
         ################################################################################################
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_TCPDUMP/d' .config 
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_SMBD36/d' .config 
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_EAP_PEAP/d' .config
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_SFTP/d' .config
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_XUPNPD/d' .config 
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_FFMPEG_NEW/d' .config 
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_SCUTCLIENT/d' .config 
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_DOGCOM/d' .config 
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_MINIEAP/d' .config 
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_NJIT_CLIENT/d' .config 
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_NAPT66/d' .config 
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_VLMCSD/d' .config
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_TTYD/d' .config 
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_LRZSZ/d' .config 
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_HTOP/d' .config 
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_NANO/d' .config 
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_IPERF3/d' .config 
-        sed -i '/CONFIG_FIRMWARE_INCLUDE_SOCAT/d' .config 
         sed -i '/CONFIG_FIRMWARE_INCLUDE_MENTOHUST/d' .config #删除配置项MENTOHUST
         sed -i '/CONFIG_FIRMWARE_INCLUDE_SCUTCLIENT/d' .config #删除配置项SCUTCLIENT
         sed -i '/CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS/d' .config #删除配置项SS plus+
@@ -84,24 +66,6 @@ jobs:
         ######################################################################
         #以下选项是定义你需要的功能（y=集成,n=忽略），重新写入到.config文件
         ######################################################################
-        echo "CONFIG_FIRMWARE_INCLUDE_TCPDUMP=n" >> .config
-        echo "CONFIG_FIRMWARE_INCLUDE_SMBD36=n" >> .config
-        echo "CONFIG_FIRMWARE_INCLUDE_EAP_PEAP=n" >> .config
-        echo "CONFIG_FIRMWARE_INCLUDE_SFTP=n" >> .config
-        echo "CONFIG_FIRMWARE_INCLUDE_XUPNPD=n" >> .config
-        echo "CONFIG_FIRMWARE_INCLUDE_FFMPEG_NEW=n" >> .config
-        echo "CONFIG_FIRMWARE_INCLUDE_SCUTCLIENT=n" >> .config
-        echo "CONFIG_FIRMWARE_INCLUDE_DOGCOM=n" >> .config
-        echo "CONFIG_FIRMWARE_INCLUDE_MINIEAP=n" >> .config
-        echo "CONFIG_FIRMWARE_INCLUDE_NJIT_CLIENT=n" >> .config
-        echo "CONFIG_FIRMWARE_INCLUDE_NAPT66=n" >> .config
-        echo "CONFIG_FIRMWARE_INCLUDE_VLMCSD=n" >> .config
-        echo "CONFIG_FIRMWARE_INCLUDE_TTYD=n" >> .config
-        echo "CONFIG_FIRMWARE_INCLUDE_LRZSZ=n" >> .config
-        echo "CONFIG_FIRMWARE_INCLUDE_HTOP=n" >> .config
-        echo "CONFIG_FIRMWARE_INCLUDE_NANO=n" >> .config
-        echo "CONFIG_FIRMWARE_INCLUDE_IPERF3=n" >> .config 
-        echo "CONFIG_FIRMWARE_INCLUDE_SOCAT=n" >> .config
         echo "CONFIG_FIRMWARE_INCLUDE_MENTOHUST=n" >> .config #MENTOHUST
         echo "CONFIG_FIRMWARE_INCLUDE_SCUTCLIENT=n" >> .config #SCUTCLIENT
         echo "CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS=y" >> .config #SS plus+
