@@ -47,18 +47,9 @@ jobs:
       run: |
         # 1.拷贝公共文件
         cp -r $BASE_PATH/$PUBLIC_PATH/$THEME_PATH  $WORK_PATH/
-        cp -f $BASE_PATH/$PUBLIC_PATH/$PUBLIC_SH  $WORK_PATH/
-        sudo chmod +x $WORK_PATH/$PUBLIC_SH
         # 循环替换自定义默认模板和构建，单个设备的 sh 拷贝 t_item 需要编译的固件名字
         for t_item in $T_NAMES;
         do
-        if [ ! -f $BASE_PATH/$t_item/$t_item.sh ] ; then
-          echo "${BASE_PATH}/${t_item}/${t_item}.sh 自定义SH文件未找到"
-        else
-          cp -f $BASE_PATH/$t_item/$t_item.sh  $WORK_PATH/
-          sudo chmod +x $WORK_PATH/$t_item.sh
-          echo "${t_item} 自定义SH文件拷贝成功"
-        fi
         if [ ! -d $BASE_PATH/$t_item/$THEME_PATH ] ; then
           echo "${BASE_PATH}/${t_item}/${THEME_PATH} 自定义主题文件夹未找到"
         elif [! -d $WORK_PATH/$THEME_PATH ] ; then
@@ -68,6 +59,10 @@ jobs:
               rm -rf $WORK_PATH/$THEME_PATH
               cp -r $BASE_PATH/$t_item/$THEME_PATH  $WORK_PATH/
               echo "${THEME_PATH} 自定义主题文件夹拷贝成功"  
+        fi
+        if [ -f $BASE_PATH/$t_item/defaults.h ] ; then
+          mv -f $BASE_PATH/$t_item/defaults.h $WORK_PATH/trunk/user/shared/defaults.h
+          echo "${t_item} defaults H文件拷贝成功"
         fi
         done
     - name: Build Firmware
