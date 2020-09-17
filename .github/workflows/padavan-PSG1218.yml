@@ -149,7 +149,7 @@ jobs:
         sudo ./build_firmware_modify $t_item          # $t_item  是循环的子对象
         sudo mv -f images/*.trx ${WORK_PATH}/images/
         done
-        echo "::set-env name=FILE_NAME::$T_NAMES-$(date "+%Y%m%d")"  # 包名
+        echo "::set-env name=FILE_NAME::$TNAME-$(date "+%Y%m%d")"  # 包名
         echo "::set-env name=IMAGES_PATH::${WORK_PATH}/images/"      # 打包目录
         echo "::set-output name=status::success"
     - name : Upload Packages           # 6. 打包文件并且上传到当前主分支
