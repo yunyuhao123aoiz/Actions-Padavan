@@ -13,6 +13,15 @@ on:
 #    - cron: 0 8 * * 5
   watch:
     types: [started]
+env:
+  UPLOAD_FIRMWARE: true
+  UPLOAD_COWTRANSFER: true
+  UPLOAD_WETRANSFER: true
+  BASE_PATH: padavan                # 基础目录
+  PUBLIC_PATH: public               # 公共目录
+  PUBLIC_SH: public.sh              # 公共命令
+  THEME_PATH: theme
+  WORK_PATH: /opt/rt-n56u           # 工作目录 一定要加 /
 
 jobs:
   build:
@@ -39,11 +48,6 @@ jobs:
     - name: Clear And Build            # 5.清理构建树并开始构建
       env:
         T_NAMES: "PSG1218"        # 设备名字数组
-        BASE_PATH: padavan                # 基础目录
-        PUBLIC_PATH: public               # 公共目录
-        PUBLIC_SH: public.sh              # 公共命令
-        THEME_PATH: theme
-        WORK_PATH: /opt/rt-n56u           # 工作目录 一定要加 /
       run: |
         # 1.拷贝公共文件
         cp -r $BASE_PATH/$PUBLIC_PATH/$THEME_PATH  $WORK_PATH/
@@ -128,9 +132,24 @@ jobs:
         sudo ./clear_tree
         sudo ./build_firmware_modify $TNAME 0
         sudo mv -f images/*.trx /opt/images/
+        
     - name : Upload packages
       uses: actions/upload-artifact@master
       if: always()
       with:
         name: Padavan-packages
         path: /opt/images
+    
+    - name: Upload firmware to cowtransfer
+      if: env.UPLOAD_COWTRANSFER == 'true' && success()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer cow --block 2621440 -s -p 64 --no-progress ${IMAGES_PATH} 2>&1 | tee cowtransfer.log
+        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+        
+    - name: Upload firmware to WeTransfer
+      if: env.UPLOAD_WETRANSFER == 'true' && success()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer wet -s -p 16 --no-progress ${IMAGES_PATH} 2>&1 | tee wetransfer.log
+        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
