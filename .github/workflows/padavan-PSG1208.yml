@@ -69,6 +69,12 @@ jobs:
               cp -r $BASE_PATH/$t_item/$THEME_PATH  $WORK_PATH/
               echo "${THEME_PATH} 自定义主题文件夹拷贝成功"  
         fi
+        echo "执行 ${PUBLIC_SH} sh"
+        sudo $WORK_PATH/$PUBLIC_SH
+        if [ -e $WORK_PATH/$t_item.sh ] ; then
+          echo "执行自定义 ${t_item} sh"
+          sudo $WORK_PATH/$t_item.sh
+        fi
         done
     - name: Build Firmware
       env:
