@@ -13,10 +13,6 @@ on:
 #    - cron: 0 8 * * 5
   watch:
     types: [started]
-env:
-  UPLOAD_FIRMWARE: true
-  UPLOAD_COWTRANSFER: true
-  UPLOAD_WETRANSFER: true
 
 jobs:
   build:
@@ -53,7 +49,7 @@ jobs:
         cp -r $BASE_PATH/$PUBLIC_PATH/$THEME_PATH  $WORK_PATH/
         cp -f $BASE_PATH/$PUBLIC_PATH/$PUBLIC_SH  $WORK_PATH/
         sudo chmod +x $WORK_PATH/$PUBLIC_SH
-        # 2. 循环替换自定义默认模板和构建，单个设备的 sh 拷贝 t_item 需要编译的固件名字
+        # 循环替换自定义默认模板和构建，单个设备的 sh 拷贝 t_item 需要编译的固件名字
         for t_item in $T_NAMES;
         do
         if [ ! -f $BASE_PATH/$t_item/$t_item.sh ] ; then
@@ -77,12 +73,8 @@ jobs:
     - name: Build Firmware
       env:
         TNAME: PSG1218
-        PUBLIC_SH: public.sh              # 公共命令
-        WORK_PATH: /opt/rt-n56u           # 工作目录 一定要加 /
       run: |
         cd /opt/rt-n56u/trunk
-        for t_item in $TNAME;
-        do
         if [ ! -f configs/templates/$TNAME.config ] ; then
         echo "configs/templates/$TNAME.config not found "
         exit 1
@@ -138,35 +130,12 @@ jobs:
         #sed -i '/自定义项/d' .config
         #echo "自定义项=y" >> .config
         #########################################################################################
-        echo "执行 ${PUBLIC_SH} sh"
-        sudo $WORK_PATH/$PUBLIC_SH
-        if [ -e $WORK_PATH/$t_item.sh ] ; then
-          echo "执行自定义 ${t_item} sh"
-          sudo $WORK_PATH/$t_item.sh
-        fi
-        # 清理构建
-        sudo ./clear_tree  
-        sudo ./build_firmware_modify $t_item          # $t_item  是循环的子对象
-        sudo mv -f images/*.trx ${WORK_PATH}/images/
-        done
-
-    - name : Upload Packages           # 6. 打包文件并且上传到当前主分支
+        sudo ./clear_tree
+        sudo ./build_firmware_modify $TNAME 0
+        sudo mv -f images/*.trx /opt/images/
+    - name : Upload packages
       uses: actions/upload-artifact@master
-      if: env.UPLOAD_FIRMWARE == 'true' && success()   # 成功才执行
+      if: always()
       with:
-        name: Padavan-${{env.FILE_NAME}}
-        path: ${{ env.IMAGES_PATH }}
-        
-        
-    - name: Upload firmware to cowtransfer
-      if: env.UPLOAD_COWTRANSFER == 'true' && success()
-      run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer cow --block 2621440 -s -p 64 --no-progress ${IMAGES_PATH} 2>&1 | tee cowtransfer.log
-        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
-    - name: Upload firmware to WeTransfer
-      if: env.UPLOAD_WETRANSFER == 'true' && success()
-      run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer wet -s -p 16 --no-progress ${IMAGES_PATH} 2>&1 | tee wetransfer.log
-        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
+        name: Padavan-packages
+        path: /opt/images
