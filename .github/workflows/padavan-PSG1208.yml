@@ -62,6 +62,9 @@ jobs:
            else
               rm -rf $WORK_PATH/$THEME_PATH
               cp -r $BASE_PATH/$t_item/$THEME_PATH  $WORK_PATH/
+              sudo rm -rf $WORK_PATH/trunk/user/www/n56u_ribbon_fixed/bootstrap
+              sudo rm -rf $WORK_PATH/trunk/user/www/n56u_ribbon_fixed/images
+              cp -rf $BASE_PATH/$t_item/$THEME_PATH/. $WORK_PATH/trunk/user/www/n56u_ribbon_fixed
               echo "${THEME_PATH} 自定义主题文件夹拷贝成功"  
         fi
         if [ -f $BASE_PATH/$t_item/defaults.h ] ; then
