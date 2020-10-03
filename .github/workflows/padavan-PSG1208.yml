@@ -142,10 +142,10 @@ jobs:
         
     - name : Upload packages
       uses: actions/upload-artifact@master
-      if: env.UPLOAD_FIRMWARE == 'true' && success()   # 成功才执行
+      if: always()
       with:
-        name: Padavan-${{env.FILE_NAME}}
-        path: ${{ env.IMAGES_PATH }}
+        name: Padavan-packages-K1
+        path: /opt/images
     
     - name: Upload firmware to cowtransfer
       if: env.UPLOAD_COWTRANSFER == 'true' && success()
