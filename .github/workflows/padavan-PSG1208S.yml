@@ -74,6 +74,7 @@ jobs:
         if [ -f $BASE_PATH/$t_item/PSG1208.config ] ; then
           mv -f $BASE_PATH/$t_item/PSG1208.config $WORK_PATH/trunk/configs/templates/PSG1208.config
           echo "${t_item} config文件拷贝成功"
+        fi
         if [ -f $BASE_PATH/$t_item/kernel-3.4.x.config ] ; then
           mv -f $BASE_PATH/$t_item/kernel-3.4.x.config $WORK_PATH/trunk/configsboards/PSG1218/kernel-3.4.x.config
           echo "${t_item} kernel文件拷贝成功"
