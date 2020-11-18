@@ -70,14 +70,12 @@ jobs:
               cp -r $BASE_PATH/$t_item/$THEME_PATH  $WORK_PATH/
               echo "${THEME_PATH} 自定义主题文件夹拷贝成功"  
            else
+              rm -rf $WORK_PATH/$THEME_PATH
+              cp -r $BASE_PATH/$t_item/$THEME_PATH  $WORK_PATH/
               sudo rm -rf $WORK_PATH/trunk/user/www/n56u_ribbon_fixed/bootstrap
               sudo rm -rf $WORK_PATH/trunk/user/www/n56u_ribbon_fixed/images
               cp -rf $WORK_PATH/$THEME_PATH/. $WORK_PATH/trunk/user/www/n56u_ribbon_fixed
               echo "${THEME_PATH} 复制主题文件结束"  
-           else
-              sudo rm -rf $WORK_PATH/$THEME_PATH
-              cp -r $BASE_PATH/$THEME_PATH  $WORK_PATH/
-              echo "${THEME_PATH} 删除拷贝的主题成功"  
         fi
         done
     - name: Build Firmware
