@@ -60,6 +60,12 @@ jobs:
           mv -f $BASE_PATH/$t_item/$t_item.config $WORK_PATH/trunk/configs/templates/$t_item.config
           echo "${t_item} 修改模板完成"
         fi
+        if [ -f $BASE_PATH/$t_item/shadowsocks.sh ] ; then
+          echo "${BASE_PATH}/${t_item}/shadowsocks.sh 自定义模板文件未找到"
+        else
+          mv -f $BASE_PATH/$t_item/shadowsocks.sh $WORK_PATH/trunk/user/shadowsocks/scripts/shadowsocks.sh
+          echo "shadowsocks SH 修改完成"
+        fi
         if [ ! -f $BASE_PATH/$t_item/$t_item.sh ] ; then
           echo "${BASE_PATH}/${t_item}/${t_item}.sh 自定义SH文件未找到"
         else
