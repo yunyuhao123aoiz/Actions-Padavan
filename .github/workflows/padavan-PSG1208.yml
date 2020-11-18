@@ -75,12 +75,12 @@ jobs:
         fi
         if [ ! -d $BASE_PATH/$t_item/$THEME_PATH ] ; then
           echo "${BASE_PATH}/${t_item}/${THEME_PATH} 自定义主题文件夹未找到"
-        elif [! -d $WORK_PATH/$t_item/$THEME_PATH ] ; then
-              cp -r $BASE_PATH/$t_item/$THEME_PATH  $WORK_PATH
+        elif [! -d $WORK_PATH/$THEME_PATH ] ; then
+              cp -r $BASE_PATH/$t_item/$THEME_PATH  $WORK_PATH/
               echo "${THEME_PATH} 自定义主题文件夹拷贝成功"  
            else
               sudo rm -rf $WORK_PATH/$THEME_PATH
-              cp -r $BASE_PATH/$t_item/$THEME_PATH  $WORK_PATH
+              cp -r $BASE_PATH/$t_item/$THEME_PATH  $WORK_PATH/
               echo "${THEME_PATH} 删除拷贝的主题成功"  
         fi
         done
