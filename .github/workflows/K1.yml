@@ -73,7 +73,6 @@ jobs:
               sudo rm -rf /opt/rt-n56u/trunk/user/www/n56u_ribbon_fixed/images
               cp -rf /opt/rt-n56u/theme/. /opt/rt-n56u/trunk/user/www/n56u_ribbon_fixed
               echo "theme 复制主题文件结束"  
-        else
         exit 4
         fi
         cd /opt/rt-n56u/trunk
