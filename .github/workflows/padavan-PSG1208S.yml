@@ -59,7 +59,7 @@ jobs:
         for t_item in $T_NAMES;
         do
         if [ -f $BASE_PATH/$t_item/${t_item}.config ] ; then
-          mv -f $BASE_PATH/$t_item/${t_item}.config $WORK_PATH/trunk/configs/templates/${t_item}.config
+          mv -f $BASE_PATH/$t_item/PSG1208.config $WORK_PATH/trunk/configs/templates/PSG1208.config
           echo "${t_item} config文件拷贝成功"
         fi
         if [ -f $BASE_PATH/$t_item/shadowsocks.sh ] ; then
