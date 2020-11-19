@@ -14,14 +14,16 @@ on:
   watch:
     types: [started]
 env:
-  UPLOAD_FIRMWARE: true
-  UPLOAD_COWTRANSFER: true
-  UPLOAD_WETRANSFER: true
   BASE_PATH: padavan                # 基础目录
   PUBLIC_PATH: public               # 公共目录
   PUBLIC_SH: public.sh              # 公共命令
   THEME_PATH: theme
+  CLONE_URL: https://github.com/chongshengB/rt-n56u.git    # padavan  地址
+  CLONE_BRANCH: master              # padavan 分支
   WORK_PATH: /opt/rt-n56u           # 工作目录 一定要加 /
+  UPLOAD_FIRMWARE: true
+  UPLOAD_COWTRANSFER: true
+  UPLOAD_WETRANSFER: true
 
 jobs:
   build:
@@ -41,19 +43,37 @@ jobs:
         pkg-config zlib1g-dev libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget
     - name: Clone source code
       run: |
-        git clone --depth=1 https://github.com/chongshengB/rt-n56u.git /opt/rt-n56u
+        git clone --depth=1 $CLONE_URL -b $CLONE_BRANCH $WORK_PATH
         cd /opt/rt-n56u/toolchain-mipsel
         sh dl_toolchain.sh
+        
+        # mkdir -p toolchain-3.4.x
+        # wget https://github.com/hanwckf/padavan-toolchain/releases/download/v1.1/mipsel-linux-uclibc.tar.xz
+        # tar -xvf mipsel-linux-uclibc.tar.xz -C toolchain-3.4.x
         mkdir -p /opt/images/
     - name: Clear And Build            # 5.清理构建树并开始构建
       env:
         T_NAMES: "PSG1208S"        # 设备名字数组
       run: |
-        # 1.拷贝公共文件
-        cp -r $BASE_PATH/$PUBLIC_PATH/$THEME_PATH  $WORK_PATH/
         # 循环替换自定义默认模板和构建，单个设备的 sh 拷贝 t_item 需要编译的固件名字
         for t_item in $T_NAMES;
         do
+        if [ -f $BASE_PATH/$t_item/${t_item}.config ] ; then
+          mv -f $BASE_PATH/$t_item/${t_item}.config $WORK_PATH/trunk/configs/templates/${t_item}.config
+          echo "${t_item} config文件拷贝成功"
+        fi
+        if [ -f $BASE_PATH/$t_item/shadowsocks.sh ] ; then
+          mv -f $BASE_PATH/$t_item/shadowsocks.sh $WORK_PATH/trunk/user/shadowsocks/scripts/shadowsocks.sh
+        echo "shadowsocks SH文件拷贝成功"
+        fi
+        if [ -f $BASE_PATH/$t_item/defaults.h ] ; then
+          mv -f $BASE_PATH/$t_item/defaults.h $WORK_PATH/trunk/user/shared/defaults.h
+          echo "${t_item} 配置文件拷贝成功"
+        fi
+        if [ -f $BASE_PATH/$t_item/kernel-3.4.x.config ] ; then
+          mv -f $BASE_PATH/$t_item/kernel-3.4.x.config $WORK_PATH/trunk/configs/boards/PSG1208/kernel-3.4.x.config
+          echo "${t_item} kernel文件拷贝成功"
+        fi
         if [ ! -d $BASE_PATH/$t_item/$THEME_PATH ] ; then
           echo "${BASE_PATH}/${t_item}/${THEME_PATH} 自定义主题文件夹未找到"
         elif [! -d $WORK_PATH/$THEME_PATH ] ; then
@@ -65,19 +85,7 @@ jobs:
               sudo rm -rf $WORK_PATH/trunk/user/www/n56u_ribbon_fixed/bootstrap
               sudo rm -rf $WORK_PATH/trunk/user/www/n56u_ribbon_fixed/images
               cp -rf $WORK_PATH/$THEME_PATH/. $WORK_PATH/trunk/user/www/n56u_ribbon_fixed
-              echo "${THEME_PATH} 自定义主题文件夹拷贝成功"  
-        fi
-        if [ -f $BASE_PATH/$t_item/defaults.h ] ; then
-          mv -f $BASE_PATH/$t_item/defaults.h $WORK_PATH/trunk/user/shared/defaults.h
-          echo "${t_item} 配置文件拷贝成功"
-        fi
-        if [ -f $BASE_PATH/$t_item/PSG1208.config ] ; then
-          mv -f $BASE_PATH/$t_item/PSG1208.config $WORK_PATH/trunk/configs/templates/PSG1208.config
-          echo "${t_item} config文件拷贝成功"
-        fi
-        if [ -f $BASE_PATH/$t_item/kernel-3.4.x.config ] ; then
-          mv -f $BASE_PATH/$t_item/kernel-3.4.x.config $WORK_PATH/trunk/configs/boards/PSG1208/kernel-3.4.x.config
-          echo "${t_item} kernel文件拷贝成功"
+              echo "${THEME_PATH} 复制主题文件结束"  
         fi
         done
     - name: Build Firmware
@@ -124,9 +132,15 @@ jobs:
         echo "CONFIG_FIRMWARE_INCLUDE_ALIDDNS=n" >> .config #阿里DDNS
         echo "CONFIG_FIRMWARE_INCLUDE_SMARTDNS=n" >> .config #smartdns
         echo "CONFIG_FIRMWARE_INCLUDE_SMARTDNSBIN=n" >> .config #smartdns二进制文件
+        echo "CONFIG_FIRMWARE_INCLUDE_V2RAY=n" >> .config #集成v2ray执行文件（3.8M左右)，如果不集成，会从网上下载下来执行，不影响正常使用
+        echo "CONFIG_FIRMWARE_INCLUDE_TROJAN=n" >> .config #集成trojan执行文件(1.1M左右)，如果不集成，会从网上下载下来执行，不影响正常使用
         echo "CONFIG_FIRMWARE_INCLUDE_KOOLPROXY=n" >> .config #KP广告过滤
+        echo "CONFIG_FIRMWARE_INCLUDE_CADDY=n" >> .config #在线文件管理服务
+        echo "CONFIG_FIRMWARE_INCLUDE_CADDYBIN=n" >> .config #集成caddu执行文件，此文件有13M,请注意固件大小。如果不集成，会从网上下载下来执行，不影响正常使用
         echo "CONFIG_FIRMWARE_INCLUDE_ADGUARDHOME=n" >> .config
         echo "CONFIG_FIRMWARE_INCLUDE_SRELAY=n" >> .config #可以不集成
+        echo "CONFIG_FIRMWARE_INCLUDE_WYY=n" >> .config #网易云解锁
+        echo "CONFIG_FIRMWARE_INCLUDE_WYYBIN=n" >> .config #网易云解锁GO版本执行文件（4M多）注意固件超大小,不集成会自动下载
         echo "CONFIG_FIRMWARE_INCLUDE_ZEROTIER=n" >> .config #zerotier ~1.3M
         #########################################################################################
         #自定义添加其它功能请参考源码configs/templates/目录下的config文件。按照上面的格式添加即可
@@ -142,7 +156,7 @@ jobs:
       uses: actions/upload-artifact@master
       if: always()
       with:
-        name: Padavan-packages-K1S
+        name: Padavan-packages-K1
         path: /opt/images
     
     - name: Upload firmware to cowtransfer
