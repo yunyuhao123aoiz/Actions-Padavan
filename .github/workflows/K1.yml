@@ -88,17 +88,21 @@ jobs:
               echo "${THEME_PATH} 自定义主题文件夹拷贝成功"  
         fi
         done
-        # 3. 开始构建
-        cd $WORK_PATH/trunk
-        if [ ! -f configs/templates/$TNAME.config ] ; then
-        echo "configs/templates/$TNAME.config not found "
-        exit 1
-        fi
+        # 3. 执行sh程序
         echo "执行 ${PUBLIC_SH} sh"
         sudo $WORK_PATH/$PUBLIC_PATH/$PUBLIC_SH
         if [ -e $WORK_PATH/$t_item.sh ] ; then
           echo "执行自定义 ${t_item} sh"
           sudo $WORK_PATH/$t_item.sh
+        fi
+    - name: Build Firmware             # 3.开始构建
+      env:
+        TNAME: PSG1218
+      run: |
+        cd /opt/rt-n56u/trunk
+        if [ ! -f configs/templates/$TNAME.config ] ; then
+        echo "configs/templates/$TNAME.config not found "
+        exit 1
         fi
         cp -f configs/templates/$TNAME.config .config
         sed -i 's/CONFIG_FIRMWARE_INCLUDE_OPENSSL_EXE=n/CONFIG_FIRMWARE_INCLUDE_OPENSSL_EXE=y/g' .config
@@ -151,7 +155,6 @@ jobs:
         #sed -i '/自定义项/d' .config
         #echo "自定义项=y" >> .config
         #########################################################################################
-        # 4. 清理构建
         sudo ./clear_tree  
         sudo ./build_firmware_modify $t_item          # $t_item  是循环的子对象
         sudo mv -f images/*.trx ${WORK_PATH}/images/
