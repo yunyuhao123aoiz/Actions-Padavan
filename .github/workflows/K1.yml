@@ -90,9 +90,10 @@ jobs:
         done
         # 3. 开始构建
         cd $WORK_PATH/trunk
-        for t_item in $T_NAMES;
-        do
-        cp -f $WORK_PATH/trunk/configs/templates/$t_item.config .config  # 拷贝模板到 .config
+        if [ ! -f configs/templates/$TNAME.config ] ; then
+        echo "configs/templates/$TNAME.config not found "
+        exit 1
+        fi
         echo "执行 ${PUBLIC_SH} sh"
         sudo $WORK_PATH/$PUBLIC_PATH/$PUBLIC_SH
         if [ -e $WORK_PATH/$t_item.sh ] ; then
