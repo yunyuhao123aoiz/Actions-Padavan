@@ -62,10 +62,6 @@ jobs:
           mv -f $BASE_PATH/$t_item/PSG1208.config $WORK_PATH/trunk/configs/templates/PSG1208.config
           echo "${t_item} config文件拷贝成功"
         fi
-        if [ -f $BASE_PATH/$t_item/shadowsocks.sh ] ; then
-          mv -f $BASE_PATH/$t_item/shadowsocks.sh $WORK_PATH/trunk/user/shadowsocks/scripts/shadowsocks.sh
-        echo "shadowsocks SH文件拷贝成功"
-        fi
         if [ -f $BASE_PATH/$t_item/defaults.h ] ; then
           mv -f $BASE_PATH/$t_item/defaults.h $WORK_PATH/trunk/user/shared/defaults.h
           echo "${t_item} 配置文件拷贝成功"
