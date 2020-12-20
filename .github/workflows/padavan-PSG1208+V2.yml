@@ -70,10 +70,6 @@ jobs:
           mv -f $BASE_PATH/$t_item/defaults.h $WORK_PATH/trunk/user/shared/defaults.h
           echo "${t_item} 配置文件拷贝成功"
         fi
-        if [ -f $BASE_PATH/$t_item/kernel-3.4.x.config ] ; then
-          mv -f $BASE_PATH/$t_item/kernel-3.4.x.config $WORK_PATH/trunk/configs/boards/PSG1208/kernel-3.4.x.config
-          echo "${t_item} kernel文件拷贝成功"
-        fi
         if [ ! -d $BASE_PATH/$t_item/$THEME_PATH ] ; then
           echo "${BASE_PATH}/${t_item}/${THEME_PATH} 自定义主题文件夹未找到"
         elif [! -d $WORK_PATH/$THEME_PATH ] ; then
