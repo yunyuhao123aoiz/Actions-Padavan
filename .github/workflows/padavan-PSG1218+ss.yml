@@ -1,5 +1,5 @@
 #修改TNAME: K2P-5.0 中的K2P-5.0为你需要编译的型号，注意名称要与configs/templates/目录下的名字相同
-name: Padavan CI PSG1218+V2
+name: Padavan CI PSG1218+ss
 
 on: 
   release:
@@ -61,10 +61,6 @@ jobs:
         if [ -f $BASE_PATH/$t_item/${t_item}.config ] ; then
           mv -f $BASE_PATH/$t_item/${t_item}.config $WORK_PATH/trunk/configs/templates/${t_item}.config
           echo "${t_item} config文件拷贝成功"
-        fi
-        if [ -f $BASE_PATH/$t_item/shadowsocks.sh ] ; then
-          mv -f $BASE_PATH/$t_item/shadowsocks.sh $WORK_PATH/trunk/user/shadowsocks/scripts/shadowsocks.sh
-        echo "shadowsocks SH文件拷贝成功"
         fi
         if [ -f $BASE_PATH/$t_item/defaults.h ] ; then
           mv -f $BASE_PATH/$t_item/defaults.h $WORK_PATH/trunk/user/shared/defaults.h
