@@ -58,6 +58,10 @@ jobs:
         # 循环替换自定义默认模板和构建，单个设备的 sh 拷贝 t_item 需要编译的固件名字
         for t_item in $T_NAMES;
         do
+        if [ -f $BASE_PATH/$t_item/${t_item}.config ] ; then
+          mv -f $BASE_PATH/$t_item/${t_item}.config $WORK_PATH/trunk/configs/templates/${t_item}.config
+          echo "${t_item} config文件拷贝成功"
+        fi
         if [ -f $BASE_PATH/$t_item/shadowsocks.sh ] ; then
           mv -f $BASE_PATH/$t_item/shadowsocks.sh $WORK_PATH/trunk/user/shadowsocks/scripts/shadowsocks.sh
         echo "shadowsocks SH文件拷贝成功"
