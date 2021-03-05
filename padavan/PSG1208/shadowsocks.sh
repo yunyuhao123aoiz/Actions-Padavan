@@ -9,6 +9,12 @@
 # See /LICENSE for more information.
 #
 NAME=shadowsocksr
+trojan_local_enable=`nvram get trojan_local_enable`
+trojan_link=`nvram get trojan_link`
+trojan_local=`nvram get trojan_local`
+v2_local_enable=`nvram get v2_local_enable`
+v2_link=`nvram get v2_link`
+v2_local=`nvram get v2_local`
 http_username=`nvram get http_username`
 CONFIG_FILE=/tmp/${NAME}.json
 CONFIG_UDP_FILE=/tmp/${NAME}_u.json
@@ -40,8 +46,20 @@ find_bin() {
 	ssr) ret="/usr/bin/ssr-redir" ;;
 	ssr-local) ret="/usr/bin/ssr-local" ;;
 	ssr-server) ret="/usr/bin/ssr-server" ;;
-	v2ray) ret="/tmp/v2ray" ;;
-	trojan) ret="/tmp/trojan" ;;
+	v2ray)
+	if [ -f "/usr/bin/v2ray" ] ; then
+       ret="/usr/bin/v2ray"
+    else
+       ret="/tmp/v2ray"
+    fi
+    ;;
+	trojan)
+	if [ -f "/usr/bin/trojan" ] ; then
+       ret="/usr/bin/trojan"
+    else
+       ret="/tmp/trojan"
+    fi
+    ;;
 	socks5) ret="/usr/bin/ipt2socks" ;;
 	esac
 	echo $ret
@@ -66,13 +84,30 @@ local type=$stype
 		sed -i 's/\\//g' $config_file
 		;;
 	trojan)
-		if [ ! -f "/tmp/trojan" ]; then
-			logger -t "SS" "trojan二进制文件下载失败，可能是地址失效或者网络异常！"
-			nvram set ss_enable=0
-			ssp_close
+		tj_bin="/usr/bin/trojan"
+		if [ ! -f "$tj_bin" ]; then
+		if [ ! -f "/tmp/trojan" ];then
+			if [ $trojan_local_enable == "1" ] && [ -s $trojan_local ] ; then
+               logger -t "SS" "trojan二进制文件复制成功"
+               cat $trojan_local > /tmp/trojan
+               chmod -R 777 /tmp/trojan
+               tj_bin="/tmp/trojan"
+            else
+               curl -k -s -o /tmp/trojan --connect-timeout 10 --retry 3 $trojan_link
+                 if [ -s "/tmp/trojan" ] && [ `grep -c "404 Not Found" /tmp/trojan` == '0' ] ; then
+                    logger -t "SS" "trojan二进制文件下载成功"
+                    chmod -R 777 /tmp/trojan
+                    tj_bin="/tmp/trojan"
+                else
+                    logger -t "SS" "trojan二进制文件下载失败，可能是地址失效或者网络异常！"
+                    rm -f /tmp/trojan
+                    nvram set ss_enable=0
+                    ssp_close
+                fi
+            fi
 		else
-			logger -t "SS" "trojan二进制文件下载成功或者已存在"
-			chmod -R 777 /tmp/trojan
+			tj_bin="/tmp/trojan"
+			fi		
 		fi
 		#tj_file=$trojan_json_file
 		if [ "$2" = "0" ]; then
@@ -84,13 +119,30 @@ local type=$stype
 		fi
 		;;
 	v2ray)
-		if [ ! -f "/tmp/v2ray" ]; then
-			logger -t "SS" "v2ray二进制文件下载失败，可能是地址失效或者网络异常！"
-			nvram set ss_enable=0
-			ssp_close
-		else
-			logger -t "SS" "v2ray二进制文件下载成功或者已存在"
-			chmod -R 777 /tmp/v2ray
+		v2_bin="/usr/bin/v2ray"
+		if [ ! -f "$v2_bin" ]; then
+		if [ ! -f "/tmp/v2ray" ];then
+			if [ $v2_local_enable == "1" ] && [ -s $v2_local ] ; then
+            logger -t "SS" "v2ray二进制文件复制成功"
+            cat $v2_local > /tmp/v2ray
+            chmod -R 777 /tmp/v2ray
+            v2_bin="/tmp/v2ray"
+else
+    curl -k -s -o /tmp/v2ray --connect-timeout 10 --retry 3 $v2_link
+    if [ -s "/tmp/v2ray" ] && [ `grep -c "404 Not Found" /tmp/v2ray` == '0' ] ; then
+        logger -t "SS" "v2ray二进制文件下载成功"
+        chmod -R 777 /tmp/v2ray
+        v2_bin="/tmp/v2ray"
+    else
+        logger -t "SS" "v2ray二进制文件下载失败，可能是地址失效或者网络异常！"
+        rm -f /tmp/v2ray
+        nvram set ss_enable=0
+        ssp_close
+    fi
+fi
+			else
+			v2_bin="/tmp/v2ray"
+			fi
 		fi
 		v2ray_enable=1
 		if [ "$2" = "1" ]; then
