@@ -169,12 +169,12 @@ start_rules() {
 	case "$stype" in
 	trojan)
 		if [ ! -f "/tmp/trojan" ];then
-			curl -k -s -o /tmp/trojan --connect-timeout 10 --retry 3 https://cdn.jsdelivr.net/gh/wangziyingwen/OutSide/trojan/trojan
+			curl -k -s -o /tmp/trojan --connect-timeout 10 --retry 3 https://cdn.jsdelivr.net/gh/Yh793/Padavan-build/ssp/trojan
 		fi
 		;;
 	v2ray)
 		if [ ! -f "/tmp/v2ray" ];then
-			curl -k -s -o /tmp/v2ray --connect-timeout 10 --retry 3 https://cdn.jsdelivr.net/gh/wangziyingwen/OutSide/v2ray/v2ray
+			curl -k -s -o /tmp/v2ray --connect-timeout 10 --retry 3 https://cdn.jsdelivr.net/gh/Yh793/Padavan-build/ssp/v2ray
 		fi
 		;;
 	esac
