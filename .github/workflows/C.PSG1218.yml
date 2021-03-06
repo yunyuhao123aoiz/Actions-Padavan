@@ -19,7 +19,11 @@ on:
   #    - cron: 0 8 * * 5
   #watch:
   #  types: [started]
-
+env:
+  BASE_PATH: padavan                # 基础目录
+  THEME_PATH: theme
+  WORK_PATH: /opt/rt-n56u           # 工作目录 一定要加 /
+  
 jobs:
   build:
     runs-on: ubuntu-20.04
@@ -37,24 +41,47 @@ jobs:
           sudo apt-get -y install unzip libtool-bin curl cmake gperf gawk flex bison nano xxd fakeroot kmod \
           cpio git python-docutils gettext automake autopoint texinfo build-essential help2man \
           pkg-config zlib1g-dev libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget libc-dev-bin
+          
       - name: Clone source code
         run: |
           git clone -b chongshengB --depth=1 https://github.com/Yh793/rt-n56u.git /opt/rt-n56u
           cd /opt/rt-n56u/toolchain-mipsel
           sh dl_toolchain.sh
           mkdir -p /opt/images/
-      - name: Recovery SSP bin files download from remote
+          
+      - name: Clear And Build            # 5.清理构建树并开始构建
+        env:
+          T_NAMES: "PSG1218"        # 设备名字数组
         run: |
-          cp -f padavan/PSG1218/PSG1218.config /opt/rt-n56u/trunk/configs/templates
-          cp -f padavan/PSG1218/shadowsocks.sh /opt/rt-n56u/trunk/user/shadowsocks/scripts
-          cp -f padavan/PSG1218/defaults.h /opt/rt-n56u/trunk/user/shared
-          cd /opt/rt-n56u/trunk/user/adguardhome
-          sed -i "s#https://cdn.jsdelivr.net/gh/chongshengB/rt-n56u/trunk/user/adguardhome/AdGuardHome#https://cdn.jsdelivr.net/gh/Yh793/Padavan-build/adg/AdGuardHome#g" ./adguardhome.sh
-          rm -rf /opt/rt-n56u/theme
-          cp -r padavan/PSG1218/theme  /opt/rt-n56u/
-          sudo rm -rf /opt/rt-n56u/trunk/user/www/n56u_ribbon_fixed/bootstrap
-          sudo rm -rf /opt/rt-n56u/trunk/user/www/n56u_ribbon_fixed/images
-          cp -rf /opt/rt-n56u/theme/. /opt/rt-n56u/trunk/user/www/n56u_ribbon_fixed
+          # 循环替换自定义默认模板和构建，单个设备的 sh 拷贝 t_item 需要编译的固件名字
+          for t_item in $T_NAMES;
+          do
+          if [ -f $BASE_PATH/$t_item/${t_item}.config ] ; then
+            mv -f $BASE_PATH/$t_item/${t_item}.config $WORK_PATH/trunk/configs/templates/${t_item}.config
+            echo "${t_item} config文件拷贝成功"
+          fi
+          if [ -f $BASE_PATH/$t_item/shadowsocks.sh ] ; then
+            mv -f $BASE_PATH/$t_item/shadowsocks.sh $WORK_PATH/trunk/user/shadowsocks/scripts/shadowsocks.sh
+          echo "shadowsocks SH文件拷贝成功"
+          fi
+          if [ -f $BASE_PATH/$t_item/defaults.h ] ; then
+            mv -f $BASE_PATH/$t_item/defaults.h $WORK_PATH/trunk/user/shared/defaults.h
+            echo "${t_item} 配置文件拷贝成功"
+          fi
+          if [ ! -d $BASE_PATH/$t_item/$THEME_PATH ] ; then
+            echo "${BASE_PATH}/${t_item}/${THEME_PATH} 自定义主题文件夹未找到"
+          elif [! -d $WORK_PATH/$THEME_PATH ] ; then
+                cp -r $BASE_PATH/$t_item/$THEME_PATH  $WORK_PATH/
+                echo "${THEME_PATH} 自定义主题文件夹拷贝成功"  
+             else
+                rm -rf $WORK_PATH/$THEME_PATH
+                cp -r $BASE_PATH/$t_item/$THEME_PATH  $WORK_PATH/
+                sudo rm -rf $WORK_PATH/trunk/user/www/n56u_ribbon_fixed/bootstrap
+                sudo rm -rf $WORK_PATH/trunk/user/www/n56u_ribbon_fixed/images
+                cp -rf $WORK_PATH/$THEME_PATH/. $WORK_PATH/trunk/user/www/n56u_ribbon_fixed
+                echo "${THEME_PATH} 复制主题文件结束"  
+          fi
+          done
 
       - name: Get current time
         uses: 1466587594/get-current-time@v2
