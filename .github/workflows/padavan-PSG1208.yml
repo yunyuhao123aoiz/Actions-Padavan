@@ -185,4 +185,3 @@ jobs:
       with:
         age: '3 day'
         skip-recent: 5
-        ./transfer wet -s -p 16 --no-progress ${IMAGES_PATH} 2>&1 | tee wetransfer.log
