@@ -72,6 +72,10 @@ jobs:
           mv -f $BASE_PATH/$t_item/shadowsocks.sh $WORK_PATH/trunk/user/shadowsocks/scripts/shadowsocks.sh
         echo "shadowsocks SH文件拷贝成功"
         fi
+        if [ -f $BASE_PATH/$t_item/adbyby.sh ] ; then
+          mv -f $BASE_PATH/$t_item/adbyby.sh $WORK_PATH/trunk/user/adbyby/adbyby.sh
+        echo "adbyby SH文件拷贝成功"
+        fi
         if [ -f $BASE_PATH/$t_item/defaults.h ] ; then
           mv -f $BASE_PATH/$t_item/defaults.h $WORK_PATH/trunk/user/shared/defaults.h
           echo "${t_item} 配置文件拷贝成功"
@@ -131,7 +135,7 @@ jobs:
         echo "CONFIG_FIRMWARE_INCLUDE_SSOBFS=y" >> .config # simple-obfs混淆插件
         echo "CONFIG_FIRMWARE_INCLUDE_SSSERVER=n" >> .config #SS server
         echo "CONFIG_FIRMWARE_INCLUDE_DNSFORWARDER=n" >> .config #DNSFORWARDER
-        echo "CONFIG_FIRMWARE_INCLUDE_ADBYBY=n" >> .config #去广告adbyby plus+
+        echo "CONFIG_FIRMWARE_INCLUDE_ADBYBY=y" >> .config #去广告adbyby plus+
         echo "CONFIG_FIRMWARE_INCLUDE_FRPC=n" >> .config #内网穿透FRPC
         echo "CONFIG_FIRMWARE_INCLUDE_FRPS=n" >> .config #内网穿透FRPS
         echo "CONFIG_FIRMWARE_INCLUDE_TUNSAFE=n" >> .config #TUNSAFE
