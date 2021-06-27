@@ -68,9 +68,10 @@ jobs:
           mv -f $BASE_PATH/$t_item/${t_item}.config $WORK_PATH/trunk/configs/templates/${t_item}.config
           echo "${t_item} config文件拷贝成功"
         fi
-        if [ -f $BASE_PATH/$t_item/adbyby.sh ] ; then
-          mv -f $BASE_PATH/$t_item/adbyby.sh $WORK_PATH/trunk/user/adbyby/adbyby.sh
-        echo "adbyby SH文件拷贝成功"
+#        if [ -f $BASE_PATH/$t_item/adbyby.sh ] ; then
+#          mv -f $BASE_PATH/$t_item/adbyby.sh $WORK_PATH/trunk/user/adbyby/adbyby.sh
+#        echo "adbyby SH文件拷贝成功"
+#        fi
         if [ -f $BASE_PATH/$t_item/defaults.h ] ; then
           mv -f $BASE_PATH/$t_item/defaults.h $WORK_PATH/trunk/user/shared/defaults.h
           echo "${t_item} 配置文件拷贝成功"
