@@ -1,0 +1,147 @@
+#修改TNAME: K2P-5.0 中的K2P-5.0为你需要编译的型号，注意名称要与configs/templates/目录下的名字相同
+name: H.PSG1208S
+
+on: 
+  release:
+    types: [published]
+  push:
+    tags:
+    - 'v*'
+  #  branches: 
+  #    - master
+#  schedule:
+#    - cron: 0 8 * * 5
+  #watch:
+  #  types: [started]
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    if: github.event.repository.owner.id == github.event.sender.id
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install unzip libtool-bin curl cmake gperf gawk flex bison nano xxd fakeroot \
+        cpio git python-docutils gettext automake autopoint texinfo build-essential help2man \
+        pkg-config zlib1g-dev libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget
+    - name: Clone source code
+      run: |
+        git clone --depth=1 https://github.com/hanwckf/rt-n56u.git /opt/rt-n56u
+        cd /opt/rt-n56u/toolchain-mipsel
+        sh dl_toolchain.sh
+        mkdir -p /opt/images/
+
+    - name: Recovery bin files download from remote
+      env:
+        T_NAMES: "PSG1208S"               # 设备名字数组
+        BASE_PATH: padavan                # 基础目录
+        THEME_PATH: theme                 # 主题目录
+        WORK_PATH: /opt/rt-n56u           # 工作目录 一定要加 /
+      run: |
+        # 循环替换自定义默认模板和构建，单个设备的 sh 拷贝 t_item 需要编译的固件名字
+        for t_item in $T_NAMES;
+        do
+        if [ -f $BASE_PATH/$t_item/${t_item}.config ] ; then
+          mv -f $BASE_PATH/$t_item/${t_item}.config $WORK_PATH/trunk/configs/templates/${t_item}.config
+          echo "${t_item} config文件拷贝成功"
+        fi
+        if [ -f $BASE_PATH/$t_item/defaults.h ] ; then
+          mv -f $BASE_PATH/$t_item/defaults.h $WORK_PATH/trunk/user/shared/defaults.h
+          echo "${t_item} 配置文件拷贝成功"
+        fi
+        if [ -f $BASE_PATH/$t_item/kernel-3.4.x.config ] ; then
+          mv -f $BASE_PATH/$t_item/kernel-3.4.x.config $WORK_PATH/trunk/configs/boards/PSG1208/kernel-3.4.x.config
+          echo "${t_item} kernel文件拷贝成功"
+        fi
+        if [ ! -d $BASE_PATH/$t_item/$THEME_PATH ] ; then
+          echo "${BASE_PATH}/${t_item}/${THEME_PATH} 自定义主题文件夹未找到"
+        elif [! -d $WORK_PATH/$THEME_PATH ] ; then
+              cp -r $BASE_PATH/$t_item/$THEME_PATH  $WORK_PATH/
+              echo "${THEME_PATH} 自定义主题文件夹拷贝成功"  
+           else
+              rm -rf $WORK_PATH/$THEME_PATH
+              cp -r $BASE_PATH/$t_item/$THEME_PATH  $WORK_PATH/
+              sudo rm -rf $WORK_PATH/trunk/user/www/n56u_ribbon_fixed/bootstrap
+              sudo rm -rf $WORK_PATH/trunk/user/www/n56u_ribbon_fixed/images
+              cp -rf $WORK_PATH/$THEME_PATH/. $WORK_PATH/trunk/user/www/n56u_ribbon_fixed
+              echo "${THEME_PATH} 复制主题文件结束"  
+        fi
+        done
+
+    - name: Get current time
+      uses: 1466587594/get-current-time@v2
+      id: current-time
+      with:
+        format: YYYYMMDDHH
+        utcOffset: "+08:00"
+    #- name: SSH connection to Actions
+    #  uses: P3TERX/ssh2actions@v1.0.0  
+    - name: Build Firmware
+      env:
+        TNAME: PSG1208S
+      run: |
+        cd /opt/rt-n56u/trunk
+        if [ ! -f configs/templates/$TNAME.config ] ; then
+        echo "configs/templates/$TNAME.config not found "
+        exit 1
+        fi
+        cp -f configs/templates/$TNAME.config .config
+        sed -i '/CONFIG_FIRMWARE_INCLUDE_SFE/d' configs/templates/$TNAME.config #删除配置项SFE加速
+        echo "CONFIG_FIRMWARE_INCLUDE_SFE=n" >> configs/templates/$TNAME.config #集成SFE加速
+        sed -i '/CONFIG_FIRMWARE_INCLUDE_REDSOCKS/d' configs/templates/$TNAME.config
+        echo "CONFIG_FIRMWARE_INCLUDE_REDSOCKS=y" >> configs/templates/$TNAME.config
+        sudo ./clear_tree
+        sudo ./build_firmware_modify $TNAME 0
+        sudo mv -f images/*.trx /opt/images/${TNAME}_Hanwckf_${{ steps.current-time.outputs.formattedTime }}.trx
+        echo "FNAME=$TNAME" >> $GITHUB_ENV
+    - name: Organize files
+      id: organize
+      run: |
+        echo "::set-output name=status::success"
+    - name: Upload packages - push to artifact file
+      uses: actions/upload-artifact@main
+      if: steps.organize.outputs.status == 'success'
+      with:
+        name: Padavan-packages
+        path: /opt/images
+      #上传到WeTransfer
+    - name: Upload firmware to WeTransfer
+      id: wetransfer
+      if: steps.organize.outputs.status == 'success'
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer wet  -s -p 16 --no-progress /opt/images/*.trx 2>&1 | tee wetransfer.log
+        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
+        echo "DOWNLOADURL2=$(cat wetransfer.log | grep -o -E "https?://[a-zA-Z0-9\.\/_&=@$%?~#-]*")" >> $GITHUB_ENV
+        echo "::set-output name=status::success"
+      #上传到奶牛快传
+    - name: Upload firmware to cowtransfer
+      id: cowtransfer
+      if: steps.wetransfer.outputs.status == 'success'
+      run: |
+        curl -sL https://git.io/cowtransfer | sh
+        ./cowtransfer-uploader -s -p 16 --hash /opt/images/*.trx 2>&1 | tee cowtransfer.log
+        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+        echo "DOWNLOADURL=$(cat cowtransfer.log | grep -o -E "https?://[a-zA-Z0-9\.\/_&=@$%?~#-]*")" >> $GITHUB_ENV
+        echo "::set-output name=status::success"
+    - name: Update README.md
+      if: steps.cowtransfer.outputs.status == 'success'
+      run: |
+        git pull origin master
+        sed "14c * 当前最新版本:${FNAME}.${{ steps.current-time.outputs.formattedTime }}.trx  最后编译时间: $(date -u -d '+8 hour' '+%Y-%m-%d %H:%M:%S')  下载地址: [奶牛快传](${DOWNLOADURL})  [WeTransfer](${DOWNLOADURL2})" README.md -i
+        git config user.name  Robot
+        git config user.email github-actions@github.com
+        git commit -m "update README.md" -a
+        git push
+    - name: Remove obsolete firmwares on artifacts
+      uses: c-hive/gha-remove-artifacts@v1.2.0
+      if: always()
+      with:
+        age: '3 day'
+        skip-recent: 5
