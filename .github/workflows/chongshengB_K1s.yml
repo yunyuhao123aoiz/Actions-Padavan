@@ -49,6 +49,7 @@ jobs:
         #cp -f PSG1208s/kernel-3.4.x.config $WORK_PATH/trunk/configs/boards/PSG1208/kernel-3.4.x.config
         #cp -f PSG1208s/defaults.h $WORK_PATH/trunk/user/shared/defaults.h
         cd $WORK_PATH/trunk/tools
+        sed -i "s#1.15.2#1.16.6#g" ./Makefile
         sed -i "s#https://gomirrors.org#https://golang.google.cn#g" ./Makefile
     - name: Build Firmware
       env:
