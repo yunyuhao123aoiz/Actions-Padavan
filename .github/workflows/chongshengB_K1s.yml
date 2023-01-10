@@ -11,6 +11,10 @@ on:
         type: boolean
         description: 'whether to apply the patch for download config bin from local or remote url'
         default: 'true'
+      theme:
+        type: boolean
+        description: 'whether to apply the patch for download theme bin from local or remote url'
+        default: 'true'
 env:
   WORK_PATH: /opt/rt-n56u
 
@@ -49,8 +53,17 @@ jobs:
         cp -f PSG1208s/kernel-3.4.x.config $WORK_PATH/trunk/configs/boards/PSG1208/kernel-3.4.x.config
         cp -f PSG1208s/defaults.h $WORK_PATH/trunk/user/shared/defaults.h
         cd $WORK_PATH/trunk/tools
-        sed -i "s#1.15.2#1.17.1#g" ./Makefile
+        #sed -i "s#1.15.2#1.17.1#g" ./Makefile
         sed -i "s#https://gomirrors.org#https://dl.google.com#g" ./Makefile
+        echo "复制配置文件结束"  
+    - name: Recovery config theme files download from remote
+      if: github.event.inputs.theme == 'true'
+      run: |
+        cd $WORK_PATH/trunk/user/www/n56u_ribbon_fixed
+        sudo rm -rf bootstrap
+        sudo rm -rf images
+        cp -rf PHICOMM_theme/. $WORK_PATH/trunk/user/www/n56u_ribbon_fixed
+        echo "复制主题文件结束"  
     - name: Build Firmware
       env:
         TNAME: PSG1208s
